@@ -2,7 +2,7 @@
 Это смс бомбер для украины написанный на c# и имеющий более 30 сервисов
 
 #### Screenshots
-![image](https://github.com/pa1n-dev/SMS-Bomber/assets/74207477/887a782d-22aa-4375-ba62-4cd6cf3f978b)
+![image](https://github.com/pa1n-dev/SMS-Bomber/assets/74207477/d23bf831-990a-4631-ba88-303c306c537b)
 
 #### How to build
 Linux:
